@@ -1,7 +1,15 @@
-import os
+import logging
+import subprocess
 from typing import Iterable
 
-from constants import DEBUG, FFMPEG_COMMAND, FRAMERATE, PATH_AUDIO_ORIGINAL, PATH_LISTFILE, PATH_OUTPUT, TIMINGS
+from constants import DEBUG
+from constants import FFMPEG_COMMAND
+from constants import FFMPEG_LOG_FILE
+from constants import FRAMERATE
+from constants import PATH_AUDIO_ORIGINAL
+from constants import PATH_LISTFILE
+from constants import PATH_OUTPUT
+from constants import TIMINGS
 import generators
 from options import Options, FrameType
 from utils import to_ffmpeg_duration_string
@@ -17,7 +25,7 @@ class VideoGenerator():
 		"""
 		self.iterators: dict(FrameType, Iterable[str]) = {}
 
-	def start_generation(self):
+	def start_generation(self) -> int:
 		if(not self.user_options.ready):
 			raise RuntimeError()
 
@@ -30,6 +38,7 @@ class VideoGenerator():
 			FrameType.CHIKAU: generators.chikau_generator(self.user_options.paths_chikau_pose),
 		}
 
+		logging.info(" Generating frames list file")
 		frame_duration: float = 1 / FRAMERATE
 		with open(PATH_LISTFILE, "w") as f:
 			f.write("ffconcat version 1.0\n")
@@ -45,11 +54,29 @@ class VideoGenerator():
 
 				if(type == FrameType.CHIKAU and TIMINGS[i - 1]['type'] == FrameType.HIPTHRUST):
 					self.iterators[FrameType.HIPTHRUST] = generators.hipthrust_generator(
-                                            	self.user_options.paths_hip_thrust_pose
-                                            )
+                                            self.user_options.paths_hip_thrust_pose
+                                        )
+		full_cmd: str = FFMPEG_COMMAND.format(
+                    path_listfile=PATH_LISTFILE,
+                    path_audio=PATH_AUDIO_ORIGINAL,
+                    framerate=FRAMERATE,
+                    path_output=PATH_OUTPUT
+                )
 
-		os.system(FFMPEG_COMMAND.format(path_listfile=PATH_LISTFILE,
-		          path_audio=PATH_AUDIO_ORIGINAL, framerate=FRAMERATE, path_output=PATH_OUTPUT))
+		logging.info(" Generating video file")
+		logging.debug(" Running command:")
+		logging.debug(f" {full_cmd}")
+		with open(FFMPEG_LOG_FILE, "w") as log:
+			return_code: int = subprocess.call(
+				full_cmd.split(' '), stdout=log, stderr=log
+			)
+
+		if(return_code == 0):
+			# os.remove(FFMPEG_LOG_FILE)
+			logging.info(" Success")
+		else:
+			logging.error(
+				f" Could not generate video file. See log in {FFMPEG_LOG_FILE}")
 
 	def get_next_filepath_of(self, frtype: FrameType) -> str:
 		return next(self.iterators[frtype])

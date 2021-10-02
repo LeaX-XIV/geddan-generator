@@ -1,7 +1,11 @@
+import logging
+
 from generator import VideoGenerator
 from options import Options
 
 if __name__ == '__main__':
+	logging.basicConfig(encoding='utf-8', level=logging.INFO)
+
 	o = Options()
 	o.select_path_idle_pose("base_frames/idle01.png")
 	o.select_paths_get_down_pose([

@@ -37,7 +37,11 @@ base_frames
 
 Run 
 ```shell
-$ python .src\entrypoint.py
+$ python .src/entrypoint.py
 ```
 
 The software will generate your video output in `.\out.mp4` (or wherever `constants.PATH_OUTPUT` is pointing at).
+
+# Dependencies
+
+- [FFmpeg](https://ffmpeg.org/download.html)
