@@ -2,15 +2,15 @@ from typing import Final
 
 from options import FrameType
 
-DEBUG: Final = True
+DEBUG: bool = False
 
-FFMPEG_COMMAND: Final = 'ffmpeg -y -f concat -safe 0 -i {path_listfile} -i {path_audio} -c:v libx264 -c:a copy -vf fps={framerate},format=yuv420p -shortest {path_output} -hide_banner'
+FFMPEG_COMMAND: Final = 'ffmpeg -y -f concat -safe 0 -i {path_listfile} -i {path_audio} -c:v libx264 -c:a copy -vf fps={framerate},format=yuv420p -shortest -hide_banner {path_output}'
 FFMPEG_LOG_FILE: Final = "./ffmpeg.log"
 
 FRAMERATE: Final = 25
-PATH_LISTFILE: Final = "out_listfile.txt"
-PATH_AUDIO_ORIGINAL: Final = "audio.aac"
-PATH_OUTPUT: Final = "out.mp4"
+PATH_LISTFILE: Final = "./out_listfile.txt"
+PATH_AUDIO_ORIGINAL: Final = "./audio.aac"
+PATH_OUTPUT: Final = "./out.mp4"
 
 # TODO: Fix timings
 TIMINGS: Final = [

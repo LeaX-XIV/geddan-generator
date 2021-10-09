@@ -1,6 +1,7 @@
 import logging
 import subprocess
-from typing import Iterable
+from typing import Dict
+from typing import Generator
 
 from constants import DEBUG
 from constants import FFMPEG_COMMAND
@@ -11,7 +12,8 @@ from constants import PATH_LISTFILE
 from constants import PATH_OUTPUT
 from constants import TIMINGS
 import generators
-from options import Options, FrameType
+from options import FrameType
+from options import Options
 from utils import to_ffmpeg_duration_string
 
 
@@ -23,7 +25,7 @@ class VideoGenerator():
 			The Options object the user will interact with.
 			It contains all the paths of the image and/or video files to generate a GEDDAN video.
 		"""
-		self.iterators: dict(FrameType, Iterable[str]) = {}
+		self.iterators: Dict[FrameType, Generator[str, None, None]] = {}
 
 	def start_generation(self) -> int:
 		if(not self.user_options.ready):
@@ -77,6 +79,8 @@ class VideoGenerator():
 		else:
 			logging.error(
 				f" Could not generate video file. See log in {FFMPEG_LOG_FILE}")
+
+		return return_code
 
 	def get_next_filepath_of(self, frtype: FrameType) -> str:
 		return next(self.iterators[frtype])

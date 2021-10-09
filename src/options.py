@@ -2,7 +2,8 @@ from enum import Enum, auto
 from os.path import exists
 from typing import List
 
-from utils import pad_right_with, remove_none
+from utils import remove_none
+from utils import FileType
 
 
 class SelectionType(Enum):
@@ -90,6 +91,9 @@ class Options:
 		if(not exists(path)):
 			raise RuntimeError()
 
+		if(FileType.get_filetype(path) != FileType.FILETYPE_IMAGE):
+			raise RuntimeError()
+
 		self.path_idle_pose = path
 		self.__check_ready__()
 
@@ -102,8 +106,10 @@ class Options:
 		for p in paths:
 			if(not exists(p)):
 				raise RuntimeError()
+			elif(FileType.get_filetype(p) != FileType.FILETYPE_IMAGE):
+				raise RuntimeError()
 
-		self.paths_get_down_pose = tuple(paths.copy())
+		self.paths_get_down_pose = paths.copy()
 		self.__check_ready__()
 
 	def select_paths_random_pose(self, paths: List[str]) -> None:
@@ -114,6 +120,8 @@ class Options:
 
 		for p in paths:
 			if(not exists(p)):
+				raise RuntimeError()
+			elif(FileType.get_filetype(p) != FileType.FILETYPE_IMAGE):
 				raise RuntimeError()
 
 		self.paths_random_pose = paths.copy()
@@ -129,7 +137,13 @@ class Options:
 			if(not exists(p)):
 				raise RuntimeError()
 
-		self.paths_hip_shake_pose = tuple(pad_right_with(paths, 3, None))
+		if(FileType.get_filetype(paths[0]) == FileType.FILETYPE_VIDEO and len(paths) != 1):
+			raise RuntimeError()
+
+		if(any(map(lambda x: FileType.get_filetype(x) == FileType.FILETYPE_IMAGE, paths)) and len(paths) != 3):
+			raise RuntimeError()
+
+		self.paths_hip_shake_pose = paths.copy()
 		self.__check_ready__()
 
 	def select_paths_hip_thrust_pose(self, paths: List[str]) -> None:
@@ -141,8 +155,10 @@ class Options:
 		for p in paths:
 			if(not exists(p)):
 				raise RuntimeError()
+			elif(FileType.get_filetype(p) != FileType.FILETYPE_IMAGE):
+				raise RuntimeError()
 
-		self.paths_hip_thrust_pose = tuple(paths.copy())
+		self.paths_hip_thrust_pose = paths.copy()
 		self.__check_ready__()
 
 	def select_paths_chikau_pose(self, paths: List[str]) -> None:
@@ -154,8 +170,10 @@ class Options:
 		for p in paths:
 			if(not exists(p)):
 				raise RuntimeError()
+			elif(FileType.get_filetype(p) != FileType.FILETYPE_IMAGE):
+				raise RuntimeError()
 
-		self.paths_chikau_pose = tuple(pad_right_with(paths, 3, None))
+		self.paths_chikau_pose = paths.copy()
 		self.__check_ready__()
 
 	def select_selection_type(self, sltype: SelectionType) -> None:
